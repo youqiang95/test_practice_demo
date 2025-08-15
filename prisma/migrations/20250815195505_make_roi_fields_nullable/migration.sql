@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE `roidata` MODIFY `dailyRoi` DOUBLE NULL,
+    MODIFY `roi1d` DOUBLE NULL,
+    MODIFY `roi3d` DOUBLE NULL,
+    MODIFY `roi7d` DOUBLE NULL,
+    MODIFY `roi14d` DOUBLE NULL,
+    MODIFY `roi30d` DOUBLE NULL,
+    MODIFY `roi60d` DOUBLE NULL,
+    MODIFY `roi90d` DOUBLE NULL;

@@ -151,19 +151,19 @@
 ### 推荐方案
 - **前端**：Next.js 14 + React 18 + TypeScript + Tailwind CSS + ShadCN/UI + Recharts
 - **后端**：Node.js + Express.js + TypeScript（必需）
-- **数据库**：MySQL 8.0+ 或 PostgreSQL 13+
+- **数据库**：MySQL 8.0+ 
 - **数据处理**：后端处理CSV导入，前端通过API获取数据
 - **渲染方式**：CSR（客户端渲染）
 
 ### 替代技术栈
 - **前端**：Vue.js 3+ / Angular 15+ + TypeScript
 - **后端**：Python (Flask/Django) / Java (Spring Boot) / Go (Gin)
-- **数据库**：PostgreSQL / MySQL / SQLite（开发环境）
+- **数据库**： MySQL / SQLite（开发环境）
 - **图表库**：D3.js / ECharts
 
 ## 开发环境要求
 - Node.js 18+
-- MySQL 8.0+ 或 PostgreSQL 13+
+- MySQL 8.0+ 
 - npm 或 yarn
 
 ## 评分标准

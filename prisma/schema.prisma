@@ -1,0 +1,32 @@
+// Prisma schema for ROI Analytics System
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model RoiData {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @db.Date    // 数据日期
+  app         String               // 应用名称
+  bidType     String   @default("CPI") 
+  country     String               // 国家地区
+  installs    Int                  // 安装次数
+  
+  // ROI指标
+  dailyRoi    Float?    
+  roi1d       Float?    
+  roi3d       Float?    
+  roi7d       Float?    
+  roi14d      Float?    
+  roi30d      Float?    
+  roi60d      Float?    
+  roi90d      Float?    
+  
+  // 索引
+  @@index([app, country, date])
+  @@index([date])
+}

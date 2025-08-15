@@ -1,24 +1,21 @@
 # 广告ROI数据分析系统开发计划
 
 ## 0. 开发环境初始化
-- [ ] 初始化前端项目(Next.js+React+TypeScript+Tailwind CSS)
-- [ ] 初始化后端项目(Node.js+Express+TypeScript)
-- [ ] 配置MYSQL数据库环境
-- [ ] 配置开发工具(ESLint/Prettier/Git等)
-- [ ] 编写环境配置文档
+- [x] 初始化前端项目(Next.js+React+TypeScript+Tailwind CSS)
+- [x] 初始化后端项目(Node.js+Express+TypeScript)
+- [x] 配置prisma和MYSQL数据库环境
+- [x] 配置开发工具(ESLint/Prettier/Git等)
 
 ## 1. 数据库设计与数据导入
-- [ ] 设计数据库表结构（包含ROI数据表和元数据表）
-- [ ] 实现CSV数据导入脚本
-- [ ] 添加0%数据标识字段
-- [ ] 编写数据库初始化文档
+- [x] 设计数据库表结构（包含ROI数据表和元数据表）
 
 ## 2. 后端API开发
-- [ ] 搭建Node.js+Express后端框架
+- [x] 搭建Node.js+Express后端框架
 - [ ] 设计RESTful API接口：
-  - 数据查询接口
-  - 筛选条件接口
-  - 移动平均计算接口
+  - [ ] 实现CSV数据导入API
+  - [ ] 数据查询接口
+  - [ ] 筛选条件接口
+  - [ ] 移动平均计算接口
 - [ ] 实现数据访问层
 - [ ] 添加错误处理和日志
 
@@ -55,5 +52,5 @@
 ## 技术选型
 - 前端：Next.js 14 + React 18 + TypeScript + Recharts
 - 后端：Node.js + Express.js + TypeScript
-- 数据库：PostgreSQL 13+
+- 数据库：MYSQL
 - 样式：Tailwind CSS
