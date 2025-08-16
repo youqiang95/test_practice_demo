@@ -5,6 +5,23 @@ export interface RoiQueryParams {
   endDate?: string;
 }
 
+export interface RoiData {
+  id: number;
+  date: Date;
+  app: string;
+  bidType: string;
+  country: string;
+  installs: number;
+  dailyRoi: number | null;
+  roi1d: number | null;
+  roi3d: number | null;
+  roi7d: number | null;
+  roi14d: number | null;
+  roi30d: number | null;
+  roi60d: number | null;
+  roi90d: number | null;
+}
+
 export interface RoiResponse {
   date: string;
   app: string;
