@@ -33,13 +33,10 @@ export class DataImportError extends AppError {
   }
 }
 
-export class CSVMissingRequiredFieldError extends DataImportError {
-  field: string;
-  
-  constructor(field: string) {
-    super(`Missing required field: ${field}`);
-    this.field = field;
-    this.name = 'CSVMissingRequiredFieldError';
+export class CSVFieldValidationError extends DataImportError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CSVFieldValidationError';
   }
 }
 

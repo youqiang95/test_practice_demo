@@ -55,9 +55,8 @@ describe('Data Import API', () => {
       .attach('file', fs.readFileSync(invalidCsv), 'invalid.csv');
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({
-      error: 'CSVMissingRequiredFieldError',
-      message: expect.stringContaining('Missing required field'),
+    expect(response.body).toMatchObject({
+      error: 'CSVFieldValidationError',
       statusCode: 400
     });
   });

@@ -1,10 +1,12 @@
 import { Router } from 'express';
-import roiRouter from './roi';
-import dataImportRouter from './data-import';
+import { getRoiData } from '../controllers/roi';
+import { importCsv } from '../controllers/dataImportController';
+import { validateRequest } from '../middleware/validation';
+import { csvUploadValidation } from '../middleware/csvUploadValidation';
 
 const router = Router();
 
-router.use('/roi', roiRouter);
-router.use('/import_csv', dataImportRouter);
+router.get('/roi', validateRequest, getRoiData);
+router.post('/import_csv', validateRequest, csvUploadValidation, importCsv);
 
 export default router;

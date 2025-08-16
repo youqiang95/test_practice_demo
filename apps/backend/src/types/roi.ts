@@ -6,7 +6,6 @@ export interface RoiQueryParams {
 }
 
 export interface RoiData {
-  id: number;
   date: Date;
   app: string;
   bidType: string;

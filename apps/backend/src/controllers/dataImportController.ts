@@ -2,33 +2,24 @@ import { Request, Response } from 'express';
 import prisma from '../prisma';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
-import fs from 'fs';
-import { DataImportError, CSVMissingRequiredFieldError } from '../types/errors';
+import { DataImportError, CSVFieldValidationError } from '../types/errors';
+import { RoiData } from '../types/roi';
+import { RawCsvRowSchema } from '../types/api/data-import';
 
 export const importCsv = async (req: Request, res: Response) => {
   if (!req.file) {
     throw new DataImportError('No file uploaded');
   }
-
-  // Check for empty file
-  if (req.file.size === 0) {
+  if (!req.file.buffer) {
+    throw new DataImportError('File is empty');
+  }
+  
+  const fileContent = req.file.buffer.toString();
+  if (!fileContent.trim()) {
     throw new DataImportError('File is empty');
   }
 
-  const results: any[] = [];
-  let fileContent: string;
-  let processedCount = 0;
-  
-  if (req.file.buffer) {
-    fileContent = req.file.buffer.toString();
-  } else {
-    fileContent = fs.readFileSync(req.file.path, 'utf8');
-  }
-
-  if (!fileContent.trim()) {
-    throw new DataImportError('File content is empty');
-  }
-
+  const results: RoiData[] = [];
   const stream = Readable.from(fileContent).pipe(csv());
 
   // 事务处理
@@ -42,41 +33,37 @@ export const importCsv = async (req: Request, res: Response) => {
     }
 
     await tx.roiData.createMany({ data: results });
-    processedCount = results.length;
   });
 
-  console.log(`Successfully imported ${processedCount} records`);
-  res.json({ success: true, count: processedCount });
+  res.json({ success: true, count: results.length });
 };
 
-function transformRow(row: any) {
-  // Validate required fields
-  const requiredFields = ['日期', 'app', '国家地区', '应用安装.总次数'];
-  for (const field of requiredFields) {
-    if (!row[field]) {
-      throw new CSVMissingRequiredFieldError(field);
-    }
+function transformRow(row: any): RoiData {
+  const result = RawCsvRowSchema.safeParse(row);
+  if (!result.success) {
+    throw new CSVFieldValidationError(`CSV字段验证失败: ${result.error.format()}`);
   }
+  const parsed = result.data;
+  const dateStr = parsed['日期'].split('(')[0];
+    
+    const parseRoi = (value: string | null): number | null => {
+      if (!value) return null;
+      return parseFloat(value.replace('%', '')) / 100;
+    };
 
-  // Safe number parsing
-  const safeParseFloat = (str: string) => {
-    if (!str) return null;
-    return parseFloat(str.toString().replace('%', '')) / 100;
-  };
-
-  return {
-    date: new Date(row['日期']),
-    app: row['app'],
-    bidType: row['出价类型'] || null,
-    country: row['国家地区'],
-    installs: parseInt(row['应用安装.总次数']),
-    dailyRoi: safeParseFloat(row['当日ROI']),
-    roi1d: safeParseFloat(row['1日ROI']),
-    roi3d: safeParseFloat(row['3日ROI']),
-    roi7d: safeParseFloat(row['7日ROI']),
-    roi14d: safeParseFloat(row['14日ROI']),
-    roi30d: safeParseFloat(row['30日ROI']),
-    roi60d: safeParseFloat(row['60日ROI']),
-    roi90d: safeParseFloat(row['90日ROI'])
-  };
+    return {
+      date: new Date(dateStr),
+      app: parsed['app'],
+      bidType: parsed['出价类型'],
+      country: parsed['国家地区'],
+      installs: parsed['应用安装.总次数'],
+      dailyRoi: parseRoi(parsed['当日ROI']),
+      roi1d: parseRoi(parsed['1日ROI']),
+      roi3d: parseRoi(parsed['3日ROI']),
+      roi7d: parseRoi(parsed['7日ROI']),
+      roi14d: parseRoi(parsed['14日ROI']),
+      roi30d: parseRoi(parsed['30日ROI']),
+      roi60d: parseRoi(parsed['60日ROI']),
+      roi90d: parseRoi(parsed['90日ROI'])
+    };
 }

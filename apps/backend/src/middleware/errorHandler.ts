@@ -5,6 +5,8 @@ import { AppError, ErrorResponse } from '../types/errors';
 export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   // Handle custom AppError instances
   if (err instanceof AppError) {
+    console.log('=============== AppError ============')
+    console.log(err)
     const errorResponse: ErrorResponse = {
       error: err.name,
       message: err.message,

@@ -9,7 +9,6 @@ describe('ROI API', () => {
       .attach('file', fs.readFileSync(TEST_CSV_PATH), 'test.csv');
   });
 
-
   it('should return ROI data with valid parameters', async () => {
     const request = getTestRequest();
     const response = await request
