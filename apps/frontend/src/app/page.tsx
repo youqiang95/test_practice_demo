@@ -1,10 +1,12 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useCallback } from 'react'
+import DataImportButton from './components/DataImportButton'
 import ChartFilters from './components/ChartFilters'
 import ROITrendChart from './components/ROITrendChart'
 
 export default function Home() {
+  const [refreshKey, setRefreshKey] = useState(0)
   const [filters, setFilters] = useState({
     app: 'App-1',
     country: '美国',
@@ -25,9 +27,12 @@ export default function Home() {
   return (
     <div className="min-h-screen p-8 bg-white dark:bg-gray-900 transition-colors duration-200">
       {/* Title Section */}
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">App ROI数据分析系统</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">多时间维度ROI趋势 (7日移动平均)</p>
+      <header className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">App ROI数据分析系统</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">多时间维度ROI趋势 (7日移动平均)</p>
+        </div>
+        <DataImportButton onImportSuccess={() => setRefreshKey(k => k + 1)} />
       </header>
 
       {/* Filters Section */}
@@ -45,6 +50,7 @@ export default function Home() {
             country={filters.country}
             displayMode={filters.displayMode}
             scaleType={filters.scaleType}
+            refreshKey={refreshKey}
           />
         </Suspense>
       </section>

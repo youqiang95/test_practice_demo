@@ -36,8 +36,9 @@ export default function ROITrendChart({
   app,
   country,
   displayMode,
-  scaleType
-}: ROITrendChartProps) {
+  scaleType,
+  refreshKey
+}: ROITrendChartProps & { refreshKey?: number }) {
   const [data, setData] = useState<ROIChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -77,7 +78,7 @@ export default function ROITrendChart({
 
   useEffect(() => {
     fetchData()
-  }, [app, country])
+  }, [app, country, refreshKey])
 
   if (loading) {
     return <div className="flex items-center justify-center h-full">加载数据中...</div>
