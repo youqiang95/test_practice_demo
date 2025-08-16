@@ -11,11 +11,9 @@
 
 ## 2. 后端API开发
 - [x] 搭建Node.js+Express后端框架
-- [ ] 设计RESTful API接口：
-  - [ ] 实现CSV数据导入API
-  - [ ] 数据查询接口
-- [ ] 实现数据访问层
-- [ ] 添加错误处理和日志
+- [x] 设计RESTful API接口：
+  - [x] 实现CSV数据导入API
+  - [x] 数据查询接口
 
 ## 3. 前端可视化开发
 - [ ] 搭建Next.js+React前端框架
