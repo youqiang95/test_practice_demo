@@ -7,7 +7,7 @@ describe('Data Import API', () => {
   it('should successfully import CSV file', async () => {
     const request = getTestRequest();
     const response = await request
-      .post('/api/v1/import_csv')
+      .post('/api/v1/data/import')
       .attach('file', fs.readFileSync(TEST_CSV_PATH), 'test.csv');
 
     expect(response.status).toBe(200);
@@ -20,7 +20,7 @@ describe('Data Import API', () => {
   it('should reject non-CSV files', async () => {
     const request = getTestRequest();
     const response = await request
-      .post('/api/v1/import_csv')
+      .post('/api/v1/data/import')
       .attach('file', Buffer.from('test'), 'test.txt');
 
     expect(response.status).toBe(400);
@@ -34,7 +34,7 @@ describe('Data Import API', () => {
   it('should handle empty files', async () => {
     const request = getTestRequest();
     const response = await request
-      .post('/api/v1/import_csv')
+      .post('/api/v1/data/import')
       .attach('file', Buffer.from(''), 'empty.csv');
 
     expect(response.status).toBe(400);
@@ -51,7 +51,7 @@ describe('Data Import API', () => {
 
     const request = getTestRequest();
     const response = await request
-      .post('/api/v1/import_csv')
+      .post('/api/v1/data/import')
       .attach('file', fs.readFileSync(invalidCsv), 'invalid.csv');
 
     expect(response.status).toBe(400);
@@ -63,7 +63,7 @@ describe('Data Import API', () => {
 
   it('should handle no file uploaded', async () => {
     const request = getTestRequest();
-    const response = await request.post('/api/v1/import_csv');
+    const response = await request.post('/api/v1/data/import');
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({

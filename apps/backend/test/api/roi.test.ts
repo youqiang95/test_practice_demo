@@ -5,14 +5,14 @@ describe('ROI API', () => {
   beforeAll(async () => {
     const request = getTestRequest();
     await request
-      .post('/api/v1/import_csv')
+      .post('/api/v1/data/import')
       .attach('file', fs.readFileSync(TEST_CSV_PATH), 'test.csv');
   });
 
   it('should return ROI data with valid parameters', async () => {
     const request = getTestRequest();
     const response = await request
-      .get('/api/v1/roi')
+      .get('/api/v1/rois')
       .query({ app: 'App-1', country: '美国' });
 
     expect(response.status).toBe(200);
@@ -24,7 +24,7 @@ describe('ROI API', () => {
   it('should return data with partial parameters', async () => {
     const request = getTestRequest();
     const response = await request
-      .get('/api/v1/roi')
+      .get('/api/v1/rois')
       .query({ app: 'App-1' });
 
     expect(response.status).toBe(200);
@@ -33,7 +33,7 @@ describe('ROI API', () => {
 
   it('should return all data without parameters', async () => {
     const request = getTestRequest();
-    const response = await request.get('/api/v1/roi');
+    const response = await request.get('/api/v1/rois');
 
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Array);
@@ -42,7 +42,7 @@ describe('ROI API', () => {
   it('should validate parameters', async () => {
     const request = getTestRequest();
     const response = await request
-      .get('/api/v1/roi')
+      .get('/api/v1/rois')
       .query({ app: 'Invalid-App', country: 'Invalid-Country' });
 
     expect(response.status).toBe(400);
