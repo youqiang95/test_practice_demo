@@ -13,6 +13,15 @@ import {
   ResponsiveContainer
 } from 'recharts'
 
+const formatPercentage = (value: number) => {
+  return `${(value * 100).toFixed(2)}%`
+}
+
+const legendSorter = (item: any) => {
+  const order = ['当日ROI', '1日ROI', '3日ROI', '7日ROI', '14日ROI', '30日ROI', '60日ROI', '90日ROI']
+  return order.indexOf(item.value)
+}
+
 type ROIChartData = {
   date: string
   dailyROI: number
@@ -58,14 +67,14 @@ export default function ROITrendChart({
       // 转换数据格式
       const formattedData = result.map((item: any) => ({
         date: item.date,
-        dailyROI: item.roi.daily,
-        roi1d: item.roi.day1,
-        roi3d: item.roi.day3,
-        roi7d: item.roi.day7,
-        roi14d: item.roi.day14,
-        roi30d: item.roi.day30,
-        roi60d: item.roi.day60,
-        roi90d: item.roi.day90
+        dailyROI: item.roi.daily ? item.roi.daily * 100 : null,
+        roi1d: item.roi.day1 ? item.roi.day1 * 100 : null,
+        roi3d: item.roi.day3 ? item.roi.day3 * 100 : null,
+        roi7d: item.roi.day7 ? item.roi.day7 * 100 : null,
+        roi14d: item.roi.day14 ? item.roi.day14 * 100 : null,
+        roi30d: item.roi.day30 ? item.roi.day30 * 100 : null,
+        roi60d: item.roi.day60 ? item.roi.day60 * 100 : null,
+        roi90d: item.roi.day90 ? item.roi.day90 * 100 : null
       }))
       
       setData(formattedData)
@@ -100,12 +109,27 @@ export default function ROITrendChart({
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
-        <YAxis domain={[0, 'dataMax + 100']} />
-        <Tooltip formatter={(value) => [`${value}%`, 'ROI']} />
-        <Legend />
+        <YAxis 
+          domain={[0, 'dataMax + 100']} 
+          tickFormatter={(value) => `${value}%`}
+        />
+        <Tooltip formatter={(value) => [`${Number(value).toFixed(2)}%`, 'ROI']} />
+        <Legend 
+          payload={[
+            { value: '当日ROI', type: 'line', id: 'dailyROI', color: '#8884d8' },
+            { value: '1日ROI', type: 'line', id: 'roi1d', color: '#82ca9d' },
+            { value: '3日ROI', type: 'line', id: 'roi3d', color: '#ffc658' },
+            { value: '7日ROI', type: 'line', id: 'roi7d', color: '#0088FE' },
+            { value: '14日ROI', type: 'line', id: 'roi14d', color: '#00C49F' },
+            { value: '30日ROI', type: 'line', id: 'roi30d', color: '#FFBB28' },
+            { value: '60日ROI', type: 'line', id: 'roi60d', color: '#FF8042' },
+            { value: '90日ROI', type: 'line', id: 'roi90d', color: '#8884d8' }
+          ]}
+          itemSorter={legendSorter}
+        />
         <ReferenceLine y={100} stroke="red" label="100%回本线" />
 
-        {/* ROI Trend Lines */}
+        {/* ROI Trend Lines - Ordered from shortest to longest period */}
         <Line
           type="monotone"
           dataKey="dailyROI"
