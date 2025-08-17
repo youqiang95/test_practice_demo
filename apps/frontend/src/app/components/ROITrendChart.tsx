@@ -107,20 +107,23 @@ const CustomTooltip = ({
     <div className="bg-white p-4 border border-gray-200 rounded shadow-sm">
       <p className="font-medium">{label}</p>
       {payload.map((item) => {
-        const isPredicted = item.payload && (
-          item.payload[`${item.dataKey}IsPredicted`] === true
-        )
-        
+        const isPredicted = item.dataKey.endsWith('Pred')
+        const realDataKey = isPredicted ? item.dataKey.slice(0, -4) : item.dataKey
+        const realName = isPredicted ? item.name.slice(0, -3) : item.name
+        if (item.value === null  || item.value === undefined){
+          return  null
+        }
+        if (item.hide){
+          return null
+        }
         return (
           <p key={item.name} style={{ color: item.color }}>
-            {item.name}: {
-              item.value !== null && item.value !== undefined 
-                ? isPredicted
-                  ? `${item.value.toFixed(2)}% (预测值)`
-                  : item.value <= 0.5
-                    ? '<=0.5%' 
-                    : `${item.value.toFixed(2)}%`
-                : '缺失(日期不足)'
+            {realName}: {
+              isPredicted
+                ? `${item.value.toFixed(2)}% (预测值)`
+                : item.value <= 0.5
+                  ? '<=0.5%' 
+                  : `${item.value.toFixed(2)}%`
             }
           </p>
         )
@@ -154,13 +157,13 @@ type ROIApiResponse = {
 type ROIChartData = {
   date: string
   dailyROI: number
-  roi1d: number
-  roi3d: number
-  roi7d: number
-  roi14d: number
-  roi30d: number
-  roi60d: number
-  roi90d: number
+  roi1d: number | null
+  roi3d: number | null
+  roi7d: number | null
+  roi14d: number | null
+  roi30d: number | null
+  roi60d: number | null
+  roi90d: number | null
   roi1dIsPredicted?: boolean
   roi3dIsPredicted?: boolean
   roi7dIsPredicted?: boolean
@@ -168,6 +171,25 @@ type ROIChartData = {
   roi30dIsPredicted?: boolean
   roi60dIsPredicted?: boolean
   roi90dIsPredicted?: boolean
+}
+
+type TransformedROIData = {
+  date: string
+  dailyROI: number | null
+  roi1d: number | null
+  roi3d: number | null
+  roi7d: number | null
+  roi14d: number | null
+  roi30d: number | null
+  roi60d: number | null
+  roi90d: number | null
+  roi1dPred: number | null
+  roi3dPred: number | null
+  roi7dPred: number | null
+  roi14dPred: number | null
+  roi30dPred: number | null
+  roi60dPred: number | null
+  roi90dPred: number | null
 }
 
 type ROITrendChartProps = {
@@ -292,7 +314,24 @@ const fetchData = async () => {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
-        data={processedData}
+        data={processedData.map(item => ({
+          date: item.date,
+          dailyROI: item.dailyROI,
+          roi1d: item.roi1dIsPredicted ? null : item.roi1d,
+          roi3d: item.roi3dIsPredicted ? null : item.roi3d,
+          roi7d: item.roi7dIsPredicted ? null : item.roi7d,
+          roi14d: item.roi14dIsPredicted ? null : item.roi14d,
+          roi30d: item.roi30dIsPredicted ? null : item.roi30d,
+          roi60d: item.roi60dIsPredicted ? null : item.roi60d,
+          roi90d: item.roi90dIsPredicted ? null : item.roi90d,
+          roi1dPred: item.roi1dIsPredicted ? item.roi1d : null,
+          roi3dPred: item.roi3dIsPredicted ? item.roi3d : null,
+          roi7dPred: item.roi7dIsPredicted ? item.roi7d : null,
+          roi14dPred: item.roi14dIsPredicted ? item.roi14d : null,
+          roi30dPred: item.roi30dIsPredicted ? item.roi30d : null,
+          roi60dPred: item.roi60dIsPredicted ? item.roi60d : null,
+          roi90dPred: item.roi90dIsPredicted ? item.roi90d : null
+        }))}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
         <CartesianGrid strokeDasharray="3 3" />
@@ -379,6 +418,77 @@ const fetchData = async () => {
           stroke="#8884d8"
           name="90日ROI"
           hide={!visibleLines.roi90d}
+        />
+        {/* Prediction Lines */}
+        <Line
+          type="monotone"
+          dataKey="roi1dPred"
+          stroke="#82ca9d"
+          strokeDasharray="5 5"
+          name="1日ROI-预测"
+          hide={!visibleLines.roi1d}
+          legendType="none"
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="roi3dPred"
+          stroke="#ffc658"
+          strokeDasharray="5 5"
+          name="3日ROI-预测"
+          hide={!visibleLines.roi3d}
+          legendType="none"
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="roi7dPred"
+          stroke="#0088FE"
+          strokeDasharray="5 5"
+          name="7日ROI-预测"
+          hide={!visibleLines.roi7d}
+          legendType="none"
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="roi14dPred"
+          stroke="#00C49F"
+          strokeDasharray="5 5"
+          name="14日ROI-预测"
+          hide={!visibleLines.roi14d}
+          legendType="none"
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="roi30dPred"
+          stroke="#FFBB28"
+          strokeDasharray="5 5"
+          name="30日ROI-预测"
+          hide={!visibleLines.roi30d}
+          legendType="none"
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="roi60dPred"
+          stroke="#FF8042"
+          strokeDasharray="5 5"
+          name="60日ROI-预测"
+          hide={!visibleLines.roi60d}
+          legendType="none"
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="roi90dPred"
+          stroke="#8884d8"
+          strokeDasharray="5 5"
+          name="90日ROI-预测"
+          hide={!visibleLines.roi90d}
+          legendType="none"
+          dot={false}
         />
       </LineChart>
     </ResponsiveContainer>
