@@ -22,13 +22,19 @@ export default function DataImportButton({ onImportSuccess }: { onImportSuccess?
         body: formData
       })
 
+      const resData = await response.json()
+
       if (!response.ok) {
-        const errorData = await response.json()
-        toast.error(errorData.message)
-        throw new Error(errorData.message)
+        toast.error(`CSV数据导入失败 ${resData.message}`)
+        throw new Error(resData.message)
       }
 
-      toast.success('CSV数据已成功导入系统')
+      if (!resData.success) {
+        toast.error(`CSV数据导入失败 ${resData.message}`)
+        throw new Error(resData.message)
+      }
+
+      toast.success(`CSV数据已成功导入系统, 导入${resData.count}行`)
       onImportSuccess?.()
     } catch (error) {
       console.error(error)
