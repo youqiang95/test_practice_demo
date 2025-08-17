@@ -57,7 +57,7 @@ const CustomTooltip = ({
       <p className="font-medium">{label}</p>
       {payload.map((item) => (
         <p key={item.name} style={{ color: item.color }}>
-          {item.name}: {item.value.toFixed(2) || 0}%
+          {item.name}: {item.value !== null && item.value !== undefined ? `${item.value.toFixed(2)}%` : '缺失'}
         </p>
       ))}
     </div>
@@ -120,14 +120,14 @@ export default function ROITrendChart({
 const formatROIData = (data: ROIApiResponse[]): ROIChartData[] => {
   return data.map((item) => ({
     date: item.date,
-    dailyROI: item.roi.daily ? item.roi.daily * 100 : null,
-    roi1d: item.roi.day1 ? item.roi.day1 * 100 : null,
-    roi3d: item.roi.day3 ? item.roi.day3 * 100 : null,
-    roi7d: item.roi.day7 ? item.roi.day7 * 100 : null,
-    roi14d: item.roi.day14 ? item.roi.day14 * 100 : null,
-    roi30d: item.roi.day30 ? item.roi.day30 * 100 : null,
-    roi60d: item.roi.day60 ? item.roi.day60 * 100 : null,
-    roi90d: item.roi.day90 ? item.roi.day90 * 100 : null
+    dailyROI: item.roi.daily !== null && item.roi.daily !== undefined ? item.roi.daily * 100 : null,
+    roi1d: item.roi.day1 !== null && item.roi.day1 !== undefined ? item.roi.day1 * 100 : null,
+    roi3d: item.roi.day3 !== null && item.roi.day3 !== undefined ? item.roi.day3 * 100 : null,
+    roi7d: item.roi.day7 !== null && item.roi.day7 !== undefined ? item.roi.day7 * 100 : null,
+    roi14d: item.roi.day14 !== null && item.roi.day14 !== undefined ? item.roi.day14 * 100 : null,
+    roi30d: item.roi.day30 !== null && item.roi.day30 !== undefined ? item.roi.day30 * 100 : null,
+    roi60d: item.roi.day60 !== null && item.roi.day60 !== undefined ? item.roi.day60 * 100 : null,
+    roi90d: item.roi.day90 !== null && item.roi.day90 !== undefined ? item.roi.day90 * 100 : null
   }))
 }
 
@@ -198,7 +198,7 @@ const fetchData = async () => {
           tickFormatter={(value) => `${value}%`}
           scale={scaleType}
         />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip content={<CustomTooltip />} filterNull={false}/>
         <Legend 
           payload={[
             { value: '当日ROI', type: 'line', id: 'dailyROI', color: '#8884d8' },

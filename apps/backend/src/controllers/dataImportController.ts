@@ -101,16 +101,36 @@ function validateRow(row: any, lineNumber: number): void {
   }
 }
 
-function transformRow(row: any, lineNumber: number): RoiData {
+export function transformRow(row: any, lineNumber: number): RoiData {
   validateRow(row, lineNumber);
   
   const dateStr = row['date'].substring(0, 10);
     
-  const parseRoi = (value: string | null): number | null => {
+  const parseRoiWithZeroCheck = (value: string | null, prevRoi: number | null): number | null => {
     if (!value) return null;
+    
     const numStr = value.replace(/%/g, '').replace(/,/g, '');
-    return parseFloat(numStr) / 100;
+    const num = parseFloat(numStr) / 100;
+    
+    // 非0值直接返回
+    if (num !== 0) return num;
+    
+    // 0值处理逻辑
+    if (prevRoi === null) return null;  // 前一个为null，当前设为null
+    if (prevRoi > 0) return null;      // 前一个为正数，当前设为null
+    
+    return 0;  // 其他情况保持0
   };
+
+  // 按顺序处理ROI字段，传递前一个ROI值
+  const dailyRoi = parseRoiWithZeroCheck(row['dailyRoi'], 0);
+  const roi1d = parseRoiWithZeroCheck(row['roi1d'], dailyRoi);
+  const roi3d = parseRoiWithZeroCheck(row['roi3d'], roi1d);
+  const roi7d = parseRoiWithZeroCheck(row['roi7d'], roi3d);
+  const roi14d = parseRoiWithZeroCheck(row['roi14d'], roi7d);
+  const roi30d = parseRoiWithZeroCheck(row['roi30d'], roi14d);
+  const roi60d = parseRoiWithZeroCheck(row['roi60d'], roi30d);
+  const roi90d = parseRoiWithZeroCheck(row['roi90d'], roi60d);
 
   return {
     date: new Date(dateStr),
@@ -118,13 +138,13 @@ function transformRow(row: any, lineNumber: number): RoiData {
     bidType: row['bidType'],
     country: row['country'],
     installs: Number(row['installs'].replace(/,/g, '')),
-    dailyRoi: parseRoi(row['dailyRoi']),
-    roi1d: parseRoi(row['roi1d']),
-    roi3d: parseRoi(row['roi3d']),
-    roi7d: parseRoi(row['roi7d']),
-    roi14d: parseRoi(row['roi14d']),
-    roi30d: parseRoi(row['roi30d']),
-    roi60d: parseRoi(row['roi60d']),
-    roi90d: parseRoi(row['roi90d'])
+    dailyRoi,
+    roi1d,
+    roi3d,
+    roi7d,
+    roi14d,
+    roi30d,
+    roi60d,
+    roi90d
   };
 }
