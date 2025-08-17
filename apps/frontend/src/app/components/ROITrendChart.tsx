@@ -18,6 +18,46 @@ const formatPercentage = (value: number) => {
   return `${(value * 100).toFixed(2)}%`
 }
 
+const predictMissingValues = (data: ROIChartData[]): ROIChartData[] => {
+  const result = [...data];
+  const roiKeys = ['roi1d', 'roi3d', 'roi7d', 'roi14d', 'roi30d', 'roi60d', 'roi90d'] as const;
+
+  roiKeys.forEach(key => {
+    // 1. 找到连续null结尾的起始位置
+    let predictionStartIndex = data.length;
+    while (predictionStartIndex > 0 && result[predictionStartIndex - 1][key] === null) {
+      predictionStartIndex--;
+    }
+
+    // 2. 计算比值平均数
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < predictionStartIndex; i++) {
+      const dailyROI = result[i].dailyROI;
+      const currentROI = result[i][key];
+      if (dailyROI !== null && dailyROI !== 0 && currentROI !== null) {
+        sum += currentROI / dailyROI;
+        count++;
+      }
+    }
+
+    // 3. 如果有有效数据则进行预测
+    if (count > 0) {
+      const ratioAvg = sum / count;
+      for (let i = predictionStartIndex; i < data.length; i++) {
+        const dailyROI = result[i].dailyROI;
+        result[i] = {
+          ...result[i],
+          [key]: dailyROI !== null ? dailyROI * ratioAvg : null,
+          [`${key}IsPredicted`]: true // 标记为预测值
+        };
+      }
+    }
+  });
+
+  return result;
+}
+
 const calculateMovingAverage = (data: ROIChartData[], key: keyof ROIChartData, windowSize = 7): ROIChartData[] => {
   return data.map((item, index) => {
     const start = Math.max(0, index - windowSize + 1)
@@ -55,17 +95,25 @@ const CustomTooltip = ({
   return (
     <div className="bg-white p-4 border border-gray-200 rounded shadow-sm">
       <p className="font-medium">{label}</p>
-      {payload.map((item) => (
-        <p key={item.name} style={{ color: item.color }}>
-          {item.name}: {
-            item.value !== null && item.value !== undefined 
-              ? item.value <= 0.5  // 这样处理的目的是保证对数刻度下没有0或过小数值影响图表展示
-                ? '<=0.5%' 
-                : `${item.value.toFixed(2)}%`
-              : '缺失(日期不足)'
-          }
-        </p>
-      ))}
+      {payload.map((item) => {
+        const isPredicted = item.payload && (
+          item.payload[`${item.dataKey}IsPredicted`] === true
+        )
+        
+        return (
+          <p key={item.name} style={{ color: item.color }}>
+            {item.name}: {
+              item.value !== null && item.value !== undefined 
+                ? isPredicted
+                  ? `${item.value.toFixed(2)}% (预测值)`
+                  : item.value <= 0.5
+                    ? '<=0.5%' 
+                    : `${item.value.toFixed(2)}%`
+                : '缺失(日期不足)'
+            }
+          </p>
+        )
+      })}
     </div>
   )
 }
@@ -102,6 +150,13 @@ type ROIChartData = {
   roi30d: number
   roi60d: number
   roi90d: number
+  roi1dIsPredicted?: boolean
+  roi3dIsPredicted?: boolean
+  roi7dIsPredicted?: boolean
+  roi14dIsPredicted?: boolean
+  roi30dIsPredicted?: boolean
+  roi60dIsPredicted?: boolean
+  roi90dIsPredicted?: boolean
 }
 
 type ROITrendChartProps = {
@@ -216,6 +271,8 @@ const fetchData = async () => {
         result = calculateMovingAverage(result, key)
       })
     }
+    // 添加预测处理
+    result = predictMissingValues(result)
     setProcessedData(result)
   }, [data, displayMode])
 
@@ -246,16 +303,6 @@ const fetchData = async () => {
         />
         <Tooltip content={<CustomTooltip />} filterNull={false}/>
         <Legend 
-          payload={[
-            { value: '当日ROI', type: 'line', id: 'dailyROI', color: '#8884d8' },
-            { value: '1日ROI', type: 'line', id: 'roi1d', color: '#82ca9d' },
-            { value: '3日ROI', type: 'line', id: 'roi3d', color: '#ffc658' },
-            { value: '7日ROI', type: 'line', id: 'roi7d', color: '#0088FE' },
-            { value: '14日ROI', type: 'line', id: 'roi14d', color: '#00C49F' },
-            { value: '30日ROI', type: 'line', id: 'roi30d', color: '#FFBB28' },
-            { value: '60日ROI', type: 'line', id: 'roi60d', color: '#FF8042' },
-            { value: '90日ROI', type: 'line', id: 'roi90d', color: '#8884d8' }
-          ]}
           itemSorter={legendSorter}
           onClick={handleLegendClick}
           formatter={(value, entry, index) => {
