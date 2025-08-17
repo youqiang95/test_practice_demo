@@ -21,11 +21,16 @@ type FilterProps = {
 }
 
 export default function ChartFilters({ onFilterChange }: FilterProps) {
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{
+    app: string
+    country: string 
+    displayMode: 'raw' | 'average'
+    scaleType: 'linear' | 'log'
+  }>({
     app: 'App-1',
     country: '美国',
-    displayMode: 'average' as const,
-    scaleType: 'linear' as const
+    displayMode: 'average',
+    scaleType: 'linear'
   })
 
   const handleChange = (key: keyof typeof filters, value: string) => {

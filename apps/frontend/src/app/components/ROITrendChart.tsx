@@ -14,6 +14,17 @@ import {
 } from 'recharts'
 import type { LegendPayload, TooltipProps } from 'recharts'
 
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  payload?: {
+    value: number
+    dataKey: string
+    name: string
+    color: string
+    hide?: boolean
+  }[]
+  label?: string
+}
+
 const lineKeyMap = {
   '当日ROI': 'dailyROI',
   '1日ROI': 'roi1d',
@@ -96,7 +107,7 @@ const CustomTooltip = ({
   active,
   payload,
   label
-}: TooltipProps<number, string>) => {
+}: CustomTooltipProps) => {
   if (!active || !payload || !payload.length) return null
 
   return (
@@ -130,7 +141,7 @@ const CustomTooltip = ({
 
 const legendSorter = (item: LegendPayload) => {
   const order = ['当日ROI', '1日ROI', '3日ROI', '7日ROI', '14日ROI', '30日ROI', '60日ROI', '90日ROI']
-  return order.indexOf(item.value)
+  return item.value ? order.indexOf(item.value) : order.length
 }
 
 type ROIApiResponse = {
@@ -218,13 +229,15 @@ export default function ROITrendChart({
   })
 
   const handleLegendClick = (data: { value: string }) => {
-    
-    const lineKey = lineKeyMap[data.value]
-    if (lineKey) {
-      setVisibleLines(prev => ({
-        ...prev,
-        [lineKey]: !prev[lineKey]
-      }))
+    // 添加类型保护，确保 data.value 是 lineKeyMap 的有效键
+    if (data.value in lineKeyMap) {
+      const lineKey = lineKeyMap[data.value as keyof typeof lineKeyMap]
+      if (lineKey) {
+        setVisibleLines(prev => ({
+          ...prev,
+          [lineKey]: !prev[lineKey]
+        }))
+      }
     }
   }
 
