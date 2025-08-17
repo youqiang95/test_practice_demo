@@ -34,34 +34,30 @@ const predictMissingValues = (data: ROIChartData[]): ROIChartData[] => {
   const roiKeys = ['roi1d', 'roi3d', 'roi7d', 'roi14d', 'roi30d', 'roi60d', 'roi90d'] as const;
 
   roiKeys.forEach(key => {
-    // 1. 找到连续null结尾的起始位置
-    let predictionStartIndex = data.length;
-    while (predictionStartIndex > 0 && result[predictionStartIndex - 1][key] === null) {
-      predictionStartIndex--;
-    }
-
-    // 2. 计算比值平均数
+    // 1. 计算比值平均数
     let sum = 0;
     let count = 0;
-    for (let i = 0; i < predictionStartIndex; i++) {
+    for (let i = 0; i < data.length; i++) {
       const dailyROI = result[i].dailyROI;
       const currentROI = result[i][key];
-      if (dailyROI !== null && dailyROI !== 0 && currentROI !== null) {
+      if (dailyROI !== null && dailyROI > 0 && currentROI !== null) {
         sum += currentROI / dailyROI;
         count++;
       }
     }
 
-    // 3. 如果有有效数据则进行预测
+    // 2. 如果有有效数据则进行预测
     if (count > 0) {
       const ratioAvg = sum / count;
-      for (let i = predictionStartIndex; i < data.length; i++) {
-        const dailyROI = result[i].dailyROI;
-        result[i] = {
-          ...result[i],
-          [key]: dailyROI !== null ? dailyROI * ratioAvg : null,
-          [`${key}IsPredicted`]: true // 标记为预测值
-        };
+      for (let i = 0; i < data.length; i++) {
+        if (result[i][key] === null) {
+          const dailyROI = result[i].dailyROI;
+          result[i] = {
+            ...result[i],
+            [key]: dailyROI !== null ? dailyROI * ratioAvg : null,
+            [`${key}IsPredicted`]: true // 标记为预测值
+          };
+        }
       }
     }
   });
@@ -122,7 +118,7 @@ const CustomTooltip = ({
               isPredicted
                 ? `${item.value.toFixed(2)}% (预测值)`
                 : item.value <= 0.5
-                  ? '<=0.5%' 
+                  ? '0%' 
                   : `${item.value.toFixed(2)}%`
             }
           </p>
