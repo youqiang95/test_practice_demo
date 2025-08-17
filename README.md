@@ -9,6 +9,7 @@
 - 移动平均线显示
 - 100%回本线标记
 - 预测数据显示
+- 管理员通过网页导入CSV数据
 
 ## 技术栈
 ### 前端
@@ -28,14 +29,14 @@
 ### 数据库
 - MySQL 8.0+
 
-## 安装指南
+## 依赖安装和数据库初始化
 
 ### 环境要求
 - Node.js 18+
 - MySQL 8.0+
 - npm 或 yarn
 
-### 安装步骤
+### 依赖安装
 1. 克隆仓库：
    ```bash
    git clone git@github.com:youqiang95/test_practice_demo.git
@@ -48,7 +49,8 @@
    cd ../frontend && npm install
    ```
 
-3. 环境变量配置：
+### 数据库初始化
+1. 环境变量配置：
    - 复制.env.example为.env文件：
      ```bash
      cd apps/backend
@@ -56,7 +58,7 @@
      ```
    - 编辑.env文件，填写实际的数据库连接信息
 
-4. 数据库初始化：
+2. 数据库初始化：
    - 运行数据库迁移：
      ```bash
      cd apps/backend
@@ -99,17 +101,36 @@
 - 图例点击切换数据线显示/隐藏
 - 筛选器实时更新图表
 
+### 导入CSV文件数据 (管理员身份特有)
+- 点击"导入CSV数据"按钮上传CSV数据到数据库
+- 可随时上传更新系统数据
+
 ## 部署指南
 ### 生产环境配置
 - 配置生产数据库连接
 - 设置环境变量：
   - DATABASE_URL
   - NODE_ENV=production
+
+### 构建代码和启动服务（在同一服务器）
 - 构建生产版本：
   ```bash
   cd apps/frontend && npm run build
   cd ../backend && npm run build
   ```
+- 启动后端服务:
+   ```bash
+   npm run start
+   ```
+
+- 启动前端服务
+   ```bash
+   cd ../frontend && npm run start
+   ```
+
+
+### Docker部署 （TODO）
+
 
 ## 文档参考
 - [系统设计文档](docs/DESIGN.md)
