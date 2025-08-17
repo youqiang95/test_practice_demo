@@ -12,10 +12,29 @@ import {
   ReferenceLine,
   ResponsiveContainer
 } from 'recharts'
-import type { LegendPayload } from 'recharts'
+import type { LegendPayload, TooltipProps } from 'recharts'
 
 const formatPercentage = (value: number) => {
   return `${(value * 100).toFixed(2)}%`
+}
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label
+}: TooltipProps<number, string>) => {
+  if (!active || !payload || !payload.length) return null
+
+  return (
+    <div className="bg-white p-4 border border-gray-200 rounded shadow-sm">
+      <p className="font-medium">{label}</p>
+      {payload.map((item) => (
+        <p key={item.name} style={{ color: item.color }}>
+          {item.name}: {item.value.toFixed(2) || 0}%
+        </p>
+      ))}
+    </div>
+  )
 }
 
 const legendSorter = (item: LegendPayload) => {
@@ -114,7 +133,7 @@ export default function ROITrendChart({
           domain={[0, 'dataMax + 100']} 
           tickFormatter={(value) => `${value}%`}
         />
-        <Tooltip formatter={(value) => [`${Number(value).toFixed(2)}%`, 'ROI']} />
+        <Tooltip content={<CustomTooltip />} />
         <Legend 
           payload={[
             { value: '当日ROI', type: 'line', id: 'dailyROI', color: '#8884d8' },
