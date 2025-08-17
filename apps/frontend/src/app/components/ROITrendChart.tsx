@@ -163,7 +163,7 @@ type ROIApiResponse = {
 
 type ROIChartData = {
   date: string
-  dailyROI: number
+  dailyROI: number | null
   roi1d: number | null
   roi3d: number | null
   roi7d: number | null
@@ -228,9 +228,9 @@ export default function ROITrendChart({
     roi90d: true
   })
 
-  const handleLegendClick = (data: { value: string }) => {
-    // 添加类型保护，确保 data.value 是 lineKeyMap 的有效键
-    if (data.value in lineKeyMap) {
+  const handleLegendClick = (data: LegendPayload) => {
+    // 添加类型保护，确保 data.value 存在且是 lineKeyMap 的有效键
+    if (data.value && data.value in lineKeyMap) {
       const lineKey = lineKeyMap[data.value as keyof typeof lineKeyMap]
       if (lineKey) {
         setVisibleLines(prev => ({
@@ -321,190 +321,194 @@ const fetchData = async () => {
   }
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart
-        data={processedData.map(item => ({
-          date: item.date,
-          dailyROI: item.dailyROI,
-          roi1d: item.roi1dIsPredicted ? null : item.roi1d,
-          roi3d: item.roi3dIsPredicted ? null : item.roi3d,
-          roi7d: item.roi7dIsPredicted ? null : item.roi7d,
-          roi14d: item.roi14dIsPredicted ? null : item.roi14d,
-          roi30d: item.roi30dIsPredicted ? null : item.roi30d,
-          roi60d: item.roi60dIsPredicted ? null : item.roi60d,
-          roi90d: item.roi90dIsPredicted ? null : item.roi90d,
-          roi1dPred: item.roi1dIsPredicted ? item.roi1d : null,
-          roi3dPred: item.roi3dIsPredicted ? item.roi3d : null,
-          roi7dPred: item.roi7dIsPredicted ? item.roi7d : null,
-          roi14dPred: item.roi14dIsPredicted ? item.roi14d : null,
-          roi30dPred: item.roi30dIsPredicted ? item.roi30d : null,
-          roi60dPred: item.roi60dIsPredicted ? item.roi60d : null,
-          roi90dPred: item.roi90dIsPredicted ? item.roi90d : null
-        }))}
-        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis 
-          domain={['dataMin', 'dataMax + 100']} 
-          tickFormatter={(value) => `${value}%`}
-          scale={scaleType}
-        />
-        <Tooltip content={<CustomTooltip />} filterNull={false}/>
-        <Legend 
-          itemSorter={legendSorter}
-          onClick={handleLegendClick}
-          formatter={(value, entry, index) => {
-            const key = lineKeyMap[value as keyof typeof lineKeyMap]
-            const isActive = visibleLines[key]
-            return (
-              <span style={{
-                color: isActive ? entry.color : '#999',
-                opacity: isActive ? 1 : 0.6,
-                textDecoration: isActive ? 'none' : 'line-through',
-                cursor: 'pointer'
-              }}>
-                {value}
-              </span>
-            )
-          }}
-        />
-        <ReferenceLine y={100} stroke="red" label="100%回本线" />
+    <>
+      <div style={{ height: 'calc(100% - 80px)' }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={processedData.map(item => ({
+              date: item.date,
+              dailyROI: item.dailyROI,
+              roi1d: item.roi1dIsPredicted ? null : item.roi1d,
+              roi3d: item.roi3dIsPredicted ? null : item.roi3d,
+              roi7d: item.roi7dIsPredicted ? null : item.roi7d,
+              roi14d: item.roi14dIsPredicted ? null : item.roi14d,
+              roi30d: item.roi30dIsPredicted ? null : item.roi30d,
+              roi60d: item.roi60dIsPredicted ? null : item.roi60d,
+              roi90d: item.roi90dIsPredicted ? null : item.roi90d,
+              roi1dPred: item.roi1dIsPredicted ? item.roi1d : null,
+              roi3dPred: item.roi3dIsPredicted ? item.roi3d : null,
+              roi7dPred: item.roi7dIsPredicted ? item.roi7d : null,
+              roi14dPred: item.roi14dIsPredicted ? item.roi14d : null,
+              roi30dPred: item.roi30dIsPredicted ? item.roi30d : null,
+              roi60dPred: item.roi60dIsPredicted ? item.roi60d : null,
+              roi90dPred: item.roi90dIsPredicted ? item.roi90d : null
+            }))}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis 
+              domain={['dataMin', 'dataMax + 100']} 
+              tickFormatter={(value) => `${value}%`}
+              scale={scaleType}
+            />
+            <Tooltip content={<CustomTooltip />} filterNull={false}/>
+            <Legend 
+              itemSorter={legendSorter}
+              onClick={handleLegendClick}
+              formatter={(value, entry, index) => {
+                const key = lineKeyMap[value as keyof typeof lineKeyMap]
+                const isActive = visibleLines[key]
+                return (
+                  <span style={{
+                    color: isActive ? entry.color : '#999',
+                    opacity: isActive ? 1 : 0.6,
+                    textDecoration: isActive ? 'none' : 'line-through',
+                    cursor: 'pointer'
+                  }}>
+                    {value}
+                  </span>
+                )
+              }}
+            />
+            <ReferenceLine y={100} stroke="red" label="100%回本线" />
 
-        {/* ROI Trend Lines - Ordered from shortest to longest period */}
-        <Line
-          type="monotone"
-          dataKey="dailyROI"
-          stroke="#8884d8"
-          name="当日ROI"
-          hide={!visibleLines.dailyROI}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi1d"
-          stroke="#82ca9d"
-          name="1日ROI"
-          hide={!visibleLines.roi1d}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi3d"
-          stroke="#ffc658"
-          name="3日ROI"
-          hide={!visibleLines.roi3d}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi7d"
-          stroke="#0088FE"
-          name="7日ROI"
-          hide={!visibleLines.roi7d}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi14d"
-          stroke="#00C49F"
-          name="14日ROI"
-          hide={!visibleLines.roi14d}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi30d"
-          stroke="#FFBB28"
-          name="30日ROI"
-          hide={!visibleLines.roi30d}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi60d"
-          stroke="#FF8042"
-          name="60日ROI"
-          hide={!visibleLines.roi60d}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi90d"
-          stroke="#8884d8"
-          name="90日ROI"
-          hide={!visibleLines.roi90d}
-        />
-        {/* Prediction Lines */}
-        <Line
-          type="monotone"
-          dataKey="roi1dPred"
-          stroke="#82ca9d"
-          strokeDasharray="5 5"
-          name="1日ROI-预测"
-          hide={!visibleLines.roi1d}
-          legendType="none"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi3dPred"
-          stroke="#ffc658"
-          strokeDasharray="5 5"
-          name="3日ROI-预测"
-          hide={!visibleLines.roi3d}
-          legendType="none"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi7dPred"
-          stroke="#0088FE"
-          strokeDasharray="5 5"
-          name="7日ROI-预测"
-          hide={!visibleLines.roi7d}
-          legendType="none"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi14dPred"
-          stroke="#00C49F"
-          strokeDasharray="5 5"
-          name="14日ROI-预测"
-          hide={!visibleLines.roi14d}
-          legendType="none"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi30dPred"
-          stroke="#FFBB28"
-          strokeDasharray="5 5"
-          name="30日ROI-预测"
-          hide={!visibleLines.roi30d}
-          legendType="none"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi60dPred"
-          stroke="#FF8042"
-          strokeDasharray="5 5"
-          name="60日ROI-预测"
-          hide={!visibleLines.roi60d}
-          legendType="none"
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="roi90dPred"
-          stroke="#8884d8"
-          strokeDasharray="5 5"
-          name="90日ROI-预测"
-          hide={!visibleLines.roi90d}
-          legendType="none"
-          dot={false}
-        />
-      </LineChart>
+            {/* ROI Trend Lines - Ordered from shortest to longest period */}
+            <Line
+              type="monotone"
+              dataKey="dailyROI"
+              stroke="#8884d8"
+              name="当日ROI"
+              hide={!visibleLines.dailyROI}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi1d"
+              stroke="#82ca9d"
+              name="1日ROI"
+              hide={!visibleLines.roi1d}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi3d"
+              stroke="#ffc658"
+              name="3日ROI"
+              hide={!visibleLines.roi3d}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi7d"
+              stroke="#0088FE"
+              name="7日ROI"
+              hide={!visibleLines.roi7d}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi14d"
+              stroke="#00C49F"
+              name="14日ROI"
+              hide={!visibleLines.roi14d}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi30d"
+              stroke="#FFBB28"
+              name="30日ROI"
+              hide={!visibleLines.roi30d}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi60d"
+              stroke="#FF8042"
+              name="60日ROI"
+              hide={!visibleLines.roi60d}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi90d"
+              stroke="#8884d8"
+              name="90日ROI"
+              hide={!visibleLines.roi90d}
+            />
+            {/* Prediction Lines */}
+            <Line
+              type="monotone"
+              dataKey="roi1dPred"
+              stroke="#82ca9d"
+              strokeDasharray="5 5"
+              name="1日ROI-预测"
+              hide={!visibleLines.roi1d}
+              legendType="none"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi3dPred"
+              stroke="#ffc658"
+              strokeDasharray="5 5"
+              name="3日ROI-预测"
+              hide={!visibleLines.roi3d}
+              legendType="none"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi7dPred"
+              stroke="#0088FE"
+              strokeDasharray="5 5"
+              name="7日ROI-预测"
+              hide={!visibleLines.roi7d}
+              legendType="none"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi14dPred"
+              stroke="#00C49F"
+              strokeDasharray="5 5"
+              name="14日ROI-预测"
+              hide={!visibleLines.roi14d}
+              legendType="none"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi30dPred"
+              stroke="#FFBB28"
+              strokeDasharray="5 5"
+              name="30日ROI-预测"
+              hide={!visibleLines.roi30d}
+              legendType="none"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi60dPred"
+              stroke="#FF8042"
+              strokeDasharray="5 5"
+              name="60日ROI-预测"
+              hide={!visibleLines.roi60d}
+              legendType="none"
+              dot={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="roi90dPred"
+              stroke="#8884d8"
+              strokeDasharray="5 5"
+              name="90日ROI-预测"
+              hide={!visibleLines.roi90d}
+              legendType="none"
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
       <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
         <p>• 实线是真实数值，虚线是缺失数据(例如日期不足)时的预测数值</p>
         <p>• 真实0%的情况，会用实线展示</p>
         <p>• 日期不足导致的0%的情况，系统已自动判定为缺失数据，并在预测曲线(虚线)上展示</p>
       </div>
-    </ResponsiveContainer>
+    </>
   )
 }

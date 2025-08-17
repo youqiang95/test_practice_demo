@@ -7,7 +7,12 @@ import ROITrendChart from './components/ROITrendChart'
 
 export default function Home() {
   const [refreshKey, setRefreshKey] = useState(0)
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{
+    app: string
+    country: string
+    displayMode: 'raw' | 'average'
+    scaleType: 'linear' | 'log'
+  }>({
     app: 'App-1',
     country: '美国',
     displayMode: 'average',
