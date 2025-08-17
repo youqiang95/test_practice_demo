@@ -1,6 +1,15 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 type FilterProps = {
   onFilterChange: (filters: {
@@ -31,32 +40,44 @@ export default function ChartFilters({ onFilterChange }: FilterProps) {
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[200px]">
           <label className="block text-sm font-medium mb-1">应用选择</label>
-          <select
-            className="w-full p-2 border rounded"
+          <Select
             value={filters.app}
-            onChange={(e) => handleChange('app', e.target.value)}
+            onValueChange={(value) => handleChange('app', value)}
           >
-            {['App-1', 'App-2', 'App-3', 'App-4', 'App-5'].map((app) => (
-              <option key={app} value={app}>
-                {app}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="选择应用" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {['App-1', 'App-2', 'App-3', 'App-4', 'App-5'].map((app) => (
+                  <SelectItem key={app} value={app}>
+                    {app}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="flex-1 min-w-[200px]">
           <label className="block text-sm font-medium mb-1">国家地区</label>
-          <select
-            className="w-full p-2 border rounded"
+          <Select
             value={filters.country}
-            onChange={(e) => handleChange('country', e.target.value)}
+            onValueChange={(value) => handleChange('country', value)}
           >
-            {['美国', '英国'].map((country) => (
-              <option key={country} value={country}>
-                {country}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="选择国家" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {['美国', '英国'].map((country) => (
+                  <SelectItem key={country} value={country}>
+                    {country}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
