@@ -54,11 +54,6 @@ export default function Home() {
           />
         </Suspense>
       </section>
-
-      {/* Footer Section */}
-      <footer className="mt-8 text-sm text-gray-500 dark:text-gray-400">
-        <p>数据范围: 最近90天</p>
-      </footer>
     </div>
   )
 }
