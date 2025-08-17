@@ -487,6 +487,11 @@ const fetchData = async () => {
           dot={false}
         />
       </LineChart>
+      <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+        <p>• 实线是真实数值，虚线是缺失数据(例如日期不足)时的预测数值</p>
+        <p>• 真实0%的情况，会用实线展示</p>
+        <p>• 日期不足导致的0%的情况，系统已自动判定为缺失数据，并在预测曲线(虚线)上展示</p>
+      </div>
     </ResponsiveContainer>
   )
 }

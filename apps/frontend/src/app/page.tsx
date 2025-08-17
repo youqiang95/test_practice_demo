@@ -30,7 +30,9 @@ export default function Home() {
       <header className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{filters.app}-多时间维度ROI趋势</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">(7日移动平均)</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {filters.displayMode === 'average' ? '(7日移动平均)' : '(原始数据)'}
+          </p>
         </div>
         <DataImportButton onImportSuccess={() => setRefreshKey(k => k + 1)} />
       </header>
