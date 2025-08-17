@@ -57,7 +57,13 @@ const CustomTooltip = ({
       <p className="font-medium">{label}</p>
       {payload.map((item) => (
         <p key={item.name} style={{ color: item.color }}>
-          {item.name}: {item.value !== null && item.value !== undefined ? `${item.value.toFixed(2)}%` : '缺失'}
+          {item.name}: {
+            item.value !== null && item.value !== undefined 
+              ? item.value <= 0.5  // 这样处理的目的是保证对数刻度下没有0或过小数值影响图表展示
+                ? '<=0.5%' 
+                : `${item.value.toFixed(2)}%`
+              : '缺失(日期不足)'
+          }
         </p>
       ))}
     </div>
@@ -118,17 +124,26 @@ export default function ROITrendChart({
   const [error, setError] = useState<string | null>(null)
 
 const formatROIData = (data: ROIApiResponse[]): ROIChartData[] => {
-  return data.map((item) => ({
-    date: item.date,
-    dailyROI: item.roi.daily !== null && item.roi.daily !== undefined ? item.roi.daily * 100 : null,
-    roi1d: item.roi.day1 !== null && item.roi.day1 !== undefined ? item.roi.day1 * 100 : null,
-    roi3d: item.roi.day3 !== null && item.roi.day3 !== undefined ? item.roi.day3 * 100 : null,
-    roi7d: item.roi.day7 !== null && item.roi.day7 !== undefined ? item.roi.day7 * 100 : null,
-    roi14d: item.roi.day14 !== null && item.roi.day14 !== undefined ? item.roi.day14 * 100 : null,
-    roi30d: item.roi.day30 !== null && item.roi.day30 !== undefined ? item.roi.day30 * 100 : null,
-    roi60d: item.roi.day60 !== null && item.roi.day60 !== undefined ? item.roi.day60 * 100 : null,
-    roi90d: item.roi.day90 !== null && item.roi.day90 !== undefined ? item.roi.day90 * 100 : null
-  }))
+  return data.map((item) => {
+    // Convert ROI values to percentage and handle 0 values for log scale
+    const convertValue = (value: number | null | undefined): number | null => {
+      if (value === null || value === undefined) return null
+      const percentage = value * 100
+      return percentage < 0.5 ? 0.5 : percentage
+    }
+
+    return {
+      date: item.date,
+      dailyROI: convertValue(item.roi.daily),
+      roi1d: convertValue(item.roi.day1),
+      roi3d: convertValue(item.roi.day3),
+      roi7d: convertValue(item.roi.day7),
+      roi14d: convertValue(item.roi.day14),
+      roi30d: convertValue(item.roi.day30),
+      roi60d: convertValue(item.roi.day60),
+      roi90d: convertValue(item.roi.day90)
+    }
+  })
 }
 
 const fetchData = async () => {
