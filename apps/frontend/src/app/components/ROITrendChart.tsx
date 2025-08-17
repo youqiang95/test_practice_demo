@@ -12,12 +12,13 @@ import {
   ReferenceLine,
   ResponsiveContainer
 } from 'recharts'
+import type { LegendPayload } from 'recharts'
 
 const formatPercentage = (value: number) => {
   return `${(value * 100).toFixed(2)}%`
 }
 
-const legendSorter = (item: any) => {
+const legendSorter = (item: LegendPayload) => {
   const order = ['当日ROI', '1日ROI', '3日ROI', '7日ROI', '14日ROI', '30日ROI', '60日ROI', '90日ROI']
   return order.indexOf(item.value)
 }

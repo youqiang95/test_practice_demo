@@ -23,14 +23,15 @@ export default function DataImportButton({ onImportSuccess }: { onImportSuccess?
       })
 
       if (!response.ok) {
-        throw new Error(await response.text())
+        const errorData = await response.json()
+        toast.error(errorData.message)
+        throw new Error(errorData.message)
       }
 
       toast.success('CSV数据已成功导入系统')
-      
       onImportSuccess?.()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : '未知错误')
+      console.error(error)
     } finally {
       setIsLoading(false)
       e.target.value = '' // 重置input
