@@ -122,6 +122,37 @@ export default function ROITrendChart({
   const [processedData, setProcessedData] = useState<ROIChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>({
+    dailyROI: true,
+    roi1d: true,
+    roi3d: true,
+    roi7d: true,
+    roi14d: true,
+    roi30d: true,
+    roi60d: true,
+    roi90d: true
+  })
+
+  const handleLegendClick = (data: { value: string }) => {
+    const lineKeyMap: Record<string, keyof typeof visibleLines> = {
+      '当日ROI': 'dailyROI',
+      '1日ROI': 'roi1d',
+      '3日ROI': 'roi3d',
+      '7日ROI': 'roi7d',
+      '14日ROI': 'roi14d',
+      '30日ROI': 'roi30d',
+      '60日ROI': 'roi60d',
+      '90日ROI': 'roi90d'
+    }
+    
+    const lineKey = lineKeyMap[data.value]
+    if (lineKey) {
+      setVisibleLines(prev => ({
+        ...prev,
+        [lineKey]: !prev[lineKey]
+      }))
+    }
+  }
 
 const formatROIData = (data: ROIApiResponse[]): ROIChartData[] => {
   return data.map((item) => {
@@ -226,6 +257,31 @@ const fetchData = async () => {
             { value: '90日ROI', type: 'line', id: 'roi90d', color: '#8884d8' }
           ]}
           itemSorter={legendSorter}
+          onClick={handleLegendClick}
+          formatter={(value, entry, index) => {
+            const lineKeyMap = {
+              '当日ROI': 'dailyROI',
+              '1日ROI': 'roi1d',
+              '3日ROI': 'roi3d',
+              '7日ROI': 'roi7d',
+              '14日ROI': 'roi14d',
+              '30日ROI': 'roi30d',
+              '60日ROI': 'roi60d',
+              '90日ROI': 'roi90d'
+            }
+            const key = lineKeyMap[value as keyof typeof lineKeyMap]
+            const isActive = visibleLines[key]
+            return (
+              <span style={{
+                color: isActive ? entry.color : '#999',
+                opacity: isActive ? 1 : 0.6,
+                textDecoration: isActive ? 'none' : 'line-through',
+                cursor: 'pointer'
+              }}>
+                {value}
+              </span>
+            )
+          }}
         />
         <ReferenceLine y={100} stroke="red" label="100%回本线" />
 
@@ -235,48 +291,56 @@ const fetchData = async () => {
           dataKey="dailyROI"
           stroke="#8884d8"
           name="当日ROI"
+          hide={!visibleLines.dailyROI}
         />
         <Line
           type="monotone"
           dataKey="roi1d"
           stroke="#82ca9d"
           name="1日ROI"
+          hide={!visibleLines.roi1d}
         />
         <Line
           type="monotone"
           dataKey="roi3d"
           stroke="#ffc658"
           name="3日ROI"
+          hide={!visibleLines.roi3d}
         />
         <Line
           type="monotone"
           dataKey="roi7d"
           stroke="#0088FE"
           name="7日ROI"
+          hide={!visibleLines.roi7d}
         />
         <Line
           type="monotone"
           dataKey="roi14d"
           stroke="#00C49F"
           name="14日ROI"
+          hide={!visibleLines.roi14d}
         />
         <Line
           type="monotone"
           dataKey="roi30d"
           stroke="#FFBB28"
           name="30日ROI"
+          hide={!visibleLines.roi30d}
         />
         <Line
           type="monotone"
           dataKey="roi60d"
           stroke="#FF8042"
           name="60日ROI"
+          hide={!visibleLines.roi60d}
         />
         <Line
           type="monotone"
           dataKey="roi90d"
           stroke="#8884d8"
           name="90日ROI"
+          hide={!visibleLines.roi90d}
         />
       </LineChart>
     </ResponsiveContainer>
