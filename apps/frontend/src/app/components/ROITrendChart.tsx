@@ -14,6 +14,17 @@ import {
 } from 'recharts'
 import type { LegendPayload, TooltipProps } from 'recharts'
 
+const lineKeyMap = {
+  '当日ROI': 'dailyROI',
+  '1日ROI': 'roi1d',
+  '3日ROI': 'roi3d',
+  '7日ROI': 'roi7d',
+  '14日ROI': 'roi14d',
+  '30日ROI': 'roi30d',
+  '60日ROI': 'roi60d',
+  '90日ROI': 'roi90d'
+} as const
+
 const formatPercentage = (value: number) => {
   return `${(value * 100).toFixed(2)}%`
 }
@@ -189,16 +200,6 @@ export default function ROITrendChart({
   })
 
   const handleLegendClick = (data: { value: string }) => {
-    const lineKeyMap: Record<string, keyof typeof visibleLines> = {
-      '当日ROI': 'dailyROI',
-      '1日ROI': 'roi1d',
-      '3日ROI': 'roi3d',
-      '7日ROI': 'roi7d',
-      '14日ROI': 'roi14d',
-      '30日ROI': 'roi30d',
-      '60日ROI': 'roi60d',
-      '90日ROI': 'roi90d'
-    }
     
     const lineKey = lineKeyMap[data.value]
     if (lineKey) {
@@ -306,16 +307,6 @@ const fetchData = async () => {
           itemSorter={legendSorter}
           onClick={handleLegendClick}
           formatter={(value, entry, index) => {
-            const lineKeyMap = {
-              '当日ROI': 'dailyROI',
-              '1日ROI': 'roi1d',
-              '3日ROI': 'roi3d',
-              '7日ROI': 'roi7d',
-              '14日ROI': 'roi14d',
-              '30日ROI': 'roi30d',
-              '60日ROI': 'roi60d',
-              '90日ROI': 'roi90d'
-            }
             const key = lineKeyMap[value as keyof typeof lineKeyMap]
             const isActive = visibleLines[key]
             return (
