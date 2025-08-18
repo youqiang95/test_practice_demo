@@ -41,12 +41,6 @@
 - [ ] CI/CD流水线配置
 - [ ] 生产环境优化
 
-## 开发里程碑
-1. 第一周：完成数据库设计和后端基础API
-2. 第二周：完成前端基础功能和图表展示
-3. 第三周：完成所有交互功能和文档
-4. 第四周：测试和部署
-
 ## 技术选型
 - 前端：Next.js 14 + React 18 + TypeScript + Recharts
 - 后端：Node.js + Express.js + TypeScript
